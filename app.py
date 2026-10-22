@@ -2,13 +2,12 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
-import os
+import altair as alt
 from datetime import date
 
-
-# =========================================================
+# ============================================================
 # PAGE CONFIG
-# =========================================================
+# ============================================================
 
 st.set_page_config(
     page_title="FutureTwin AI",
@@ -17,15 +16,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-
-# =========================================================
+# ============================================================
 # CUSTOM CSS
-# =========================================================
+# ============================================================
 
 st.markdown("""
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
@@ -33,241 +31,309 @@ html, body, [class*="css"] {
 
 .stApp {
     background:
-        radial-gradient(circle at 10% 10%, rgba(75, 70, 180, 0.16), transparent 28%),
-        radial-gradient(circle at 90% 10%, rgba(0, 190, 255, 0.10), transparent 25%),
-        #070a12;
-    color: #f4f7ff;
+        radial-gradient(
+            circle at 8% 8%,
+            rgba(124, 92, 255, 0.22),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 92% 12%,
+            rgba(31, 211, 198, 0.16),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 55% 100%,
+            rgba(225, 82, 170, 0.10),
+            transparent 32%
+        ),
+        #0b1020;
+    color: #f6f7ff;
 }
+
+/* Main container */
 
 .block-container {
-    max-width: 1400px;
+    max-width: 1450px;
     padding-top: 2rem;
-    padding-bottom: 4rem;
+    padding-bottom: 3rem;
 }
 
+/* Hero */
 
-/* =========================================================
-   HEADINGS
-========================================================= */
+.hero {
+    padding: 55px 45px;
+    border-radius: 28px;
+    margin-bottom: 30px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(108, 78, 220, 0.22),
+            rgba(23, 190, 181, 0.13),
+            rgba(214, 76, 165, 0.09)
+        );
+
+    border: 1px solid rgba(180, 170, 255, 0.20);
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,0.30),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+}
 
 .hero-title {
+    font-family: 'Poppins', sans-serif;
     font-size: 58px;
     font-weight: 800;
-    line-height: 1.05;
-    margin-bottom: 15px;
-    background: linear-gradient(90deg, #ffffff, #9ea9ff, #6de7ff);
+    margin: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffffff,
+            #b9a7ff,
+            #61e6d2,
+            #ff9bd8
+        );
+
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .hero-subtitle {
-    font-size: 19px;
-    color: #aeb7cb;
-    max-width: 760px;
+    color: #aeb8d2;
+    font-size: 18px;
     line-height: 1.7;
+    max-width: 850px;
+    margin-top: 12px;
 }
 
+/* Section */
+
 .section-title {
+    font-family: 'Poppins', sans-serif;
     font-size: 30px;
-    font-weight: 750;
-    margin-top: 25px;
-    margin-bottom: 8px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-top: 15px;
 }
 
 .section-subtitle {
-    color: #8f99af;
-    margin-bottom: 25px;
+    color: #8994b0;
+    font-size: 15px;
+    margin-bottom: 22px;
 }
 
-
-/* =========================================================
-   CARDS
-========================================================= */
+/* Cards */
 
 .card {
-    background: rgba(18, 23, 38, 0.88);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(24, 29, 53, 0.94),
+            rgba(15, 23, 43, 0.94)
+        );
+
+    border: 1px solid rgba(145, 157, 210, 0.13);
+    border-radius: 20px;
     padding: 25px;
-    height: 100%;
-    box-shadow: 0 12px 35px rgba(0,0,0,0.22);
+
+    box-shadow:
+        0 15px 45px rgba(0,0,0,0.20);
 }
-
-.card h3 {
-    margin-top: 0;
-    font-size: 20px;
-}
-
-.card p {
-    color: #9ba5bb;
-    line-height: 1.6;
-}
-
-
-/* =========================================================
-   METRICS
-========================================================= */
 
 .metric-card {
-    background: linear-gradient(
-        145deg,
-        rgba(21,27,44,0.96),
-        rgba(12,16,28,0.96)
-    );
+    background:
+        linear-gradient(
+            145deg,
+            rgba(29, 34, 62, 0.98),
+            rgba(16, 25, 48, 0.98)
+        );
 
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(145,157,210,0.14);
     border-radius: 18px;
-    padding: 23px;
-    text-align: center;
-}
-
-.metric-value {
-    font-size: 34px;
-    font-weight: 800;
-    margin: 8px 0;
+    padding: 24px;
 }
 
 .metric-label {
-    color: #8f99af;
-    font-size: 14px;
+    color: #8f9ab5;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
+.metric-value {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #ffffff;
+    font-size: 34px;
+    font-weight: 700;
+    margin: 8px 0;
+}
 
-/* =========================================================
-   PREDICTION
-========================================================= */
+/* Prediction */
 
 .prediction-box {
-    background: linear-gradient(
-        135deg,
-        rgba(72, 62, 170, 0.20),
-        rgba(0, 178, 230, 0.10)
-    );
+    background:
+        linear-gradient(
+            135deg,
+            rgba(111,82,217,0.18),
+            rgba(34,199,195,0.10)
+        );
 
-    border: 1px solid rgba(124, 133, 255, 0.25);
-    border-radius: 22px;
-    padding: 30px;
-    margin-top: 20px;
+    border: 1px solid rgba(154,137,255,0.30);
+    border-radius: 20px;
+    padding: 26px;
 }
 
 .prediction-title {
-    font-size: 25px;
-    font-weight: 750;
+    font-family: 'Poppins', sans-serif;
+    font-size: 21px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 12px;
 }
 
 .prediction-text {
-    color: #c0c8da;
-    line-height: 1.7;
-    font-size: 16px;
+    color: #aeb8d2;
+    line-height: 1.9;
 }
 
-
-/* =========================================================
-   BUTTONS
-========================================================= */
+/* Buttons */
 
 .stButton > button {
     border-radius: 12px;
-    border: 1px solid rgba(120,130,255,0.35);
-    background: linear-gradient(90deg, #5148c9, #287fc9);
+    border: 1px solid rgba(170,160,255,0.25);
+
+    background:
+        linear-gradient(
+            90deg,
+            #6f52d9,
+            #19b9aa,
+            #d35cae
+        );
+
     color: white;
     font-weight: 700;
-    min-height: 45px;
+    min-height: 48px;
+
+    transition: 0.2s ease;
 }
 
 .stButton > button:hover {
-    border-color: #7e8cff;
-    box-shadow: 0 0 25px rgba(87, 91, 220, 0.25);
+    transform: translateY(-2px);
+    box-shadow:
+        0 10px 30px rgba(111,82,217,0.30);
 }
 
+/* Inputs */
 
-/* =========================================================
-   TABS
-========================================================= */
+div[data-baseweb="input"] {
+    background-color: #121a30;
+}
+
+div[data-baseweb="select"] > div {
+    background-color: #121a30;
+}
+
+input {
+    color: white !important;
+}
+
+/* Tabs */
 
 button[data-baseweb="tab"] {
+    font-family: 'Inter', sans-serif;
+    color: #8994b0;
     font-weight: 600;
-    color: #9da7bc;
 }
 
 button[data-baseweb="tab"][aria-selected="true"] {
-    color: white;
+    color: #ffffff;
+    background: rgba(111,82,217,0.16);
+    border-radius: 10px;
 }
 
+/* Dataframe */
 
-/* =========================================================
-   INPUTS
-========================================================= */
+div[data-testid="stDataFrame"] {
+    border: 1px solid rgba(154,137,255,0.14);
+    border-radius: 14px;
+    overflow: hidden;
+}
 
-div[data-baseweb="input"] {
-    background-color: #111624;
+/* Divider */
+
+.soft-divider {
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(145,157,210,0.20),
+        transparent
+    );
+    margin: 25px 0;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 
-# =========================================================
-# MODEL FILES
-# =========================================================
+# ============================================================
+# LOAD MODELS
+# ============================================================
 
-REVENUE_MODEL_FILE = "futuretwin_revenue_model.pkl"
-DEMAND_MODEL_FILE = "futuretwin_demand_model.pkl"
-NLP_MODEL_FILE = "futuretwin_nlp_model.pkl"
-TFIDF_FILE = "futuretwin_tfidf.pkl"
+@st.cache_resource
+def load_models():
+
+    revenue_model = joblib.load(
+        "futuretwin_revenue_model.pkl"
+    )
+
+    demand_model = joblib.load(
+        "futuretwin_demand_model.pkl"
+    )
+
+    nlp_model = joblib.load(
+        "futuretwin_nlp_model.pkl"
+    )
+
+    tfidf = joblib.load(
+        "futuretwin_tfidf.pkl"
+    )
+
+    return (
+        revenue_model,
+        demand_model,
+        nlp_model,
+        tfidf
+    )
 
 
-required_files = [
-    REVENUE_MODEL_FILE,
-    DEMAND_MODEL_FILE,
-    NLP_MODEL_FILE,
-    TFIDF_FILE
-]
+try:
 
+    (
+        revenue_model,
+        demand_model,
+        nlp_model,
+        tfidf
+    ) = load_models()
 
-missing_files = [
-    file for file in required_files
-    if not os.path.exists(file)
-]
+    models_loaded = True
 
+except Exception as e:
 
-if missing_files:
+    models_loaded = False
 
     st.error(
-        "Some required model files are missing."
+        "Model files could not be loaded. "
+        "Please make sure all .pkl files are in the same folder as app.py."
     )
 
-    st.write("Missing files:")
-
-    for file in missing_files:
-        st.write(f"- `{file}`")
-
-    st.info(
-        "Keep app.py and the four PKL files in the same folder."
-    )
-
-    st.stop()
+    st.code(str(e))
 
 
-# =========================================================
-# LOAD MODELS
-# =========================================================
-
-revenue_model = joblib.load(REVENUE_MODEL_FILE)
-demand_model = joblib.load(DEMAND_MODEL_FILE)
-nlp_model = joblib.load(NLP_MODEL_FILE)
-tfidf = joblib.load(TFIDF_FILE)
-
-
-# =========================================================
+# ============================================================
 # SESSION STATE
-# =========================================================
-
-if "company" not in st.session_state:
-    st.session_state.company = "My Company"
-
-if "history" not in st.session_state:
-    st.session_state.history = []
+# ============================================================
 
 if "prediction" not in st.session_state:
     st.session_state.prediction = None
@@ -275,67 +341,115 @@ if "prediction" not in st.session_state:
 if "input_data" not in st.session_state:
     st.session_state.input_data = None
 
-if "product_description" not in st.session_state:
-    st.session_state.product_description = ""
+if "history" not in st.session_state:
+    st.session_state.history = []
 
 
-# =========================================================
-# MODEL FEATURE PREPARATION
-# =========================================================
+# ============================================================
+# HERO
+# ============================================================
 
-def create_regression_features(
+st.markdown("""
+<div class="hero">
+
+<div class="hero-title">
+🔮 FutureTwin AI
+</div>
+
+<div class="hero-subtitle">
+
+Simulate possible business futures using machine learning,
+scenario modelling and interactive decision support.
+
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+
+# ============================================================
+# TABS
+# ============================================================
+
+tabs = st.tabs([
+    "Overview",
+    "Company Setup",
+    "Digital Twin",
+    "Future Simulator",
+    "AI Insights",
+    "Compare Futures",
+    "History"
+])
+
+
+# ============================================================
+# HELPER FUNCTIONS
+# ============================================================
+
+def create_features(
     quantity,
     price,
     selected_date
 ):
-    """
-    Create the 9 features expected by the trained
-    FutureTwin revenue and demand models.
-
-    The original models were trained on daily-level
-    Online Retail II features.
-    """
-
-    quantity = float(quantity)
-    price = float(price)
 
     previous_revenue = quantity * price
-
     previous_quantity = quantity
 
-    rolling_7_revenue = previous_revenue
-
-    rolling_7_quantity = previous_quantity
+    rolling7_revenue = previous_revenue
+    rolling7_quantity = previous_quantity
 
     average_price = price
-
-    # One user scenario represents one transaction/day input.
     transactions = 1
-
     returns = 0
 
-    month = selected_date.month
+    return pd.DataFrame([{
 
-    day_of_week = selected_date.weekday()
-
-    features = pd.DataFrame([{
         "PreviousRevenue": previous_revenue,
+
         "PreviousQuantity": previous_quantity,
-        "Rolling7Revenue": rolling_7_revenue,
-        "Rolling7Quantity": rolling_7_quantity,
+
+        "Rolling7Revenue": rolling7_revenue,
+
+        "Rolling7Quantity": rolling7_quantity,
+
         "AveragePrice": average_price,
+
         "Transactions": transactions,
+
         "Returns": returns,
-        "Month": month,
-        "DayOfWeek": day_of_week
+
+        "Month": selected_date.month,
+
+        "DayOfWeek": selected_date.weekday()
+
     }])
 
-    return features
 
+def scenario_adjusted_revenue(
+    baseline_revenue,
+    demand_change,
+    price_change
+):
 
-# =========================================================
-# REVENUE PREDICTION
-# =========================================================
+    demand_factor = (
+        1 + float(demand_change) / 100
+    )
+
+    price_factor = (
+        1 + float(price_change) / 100
+    )
+
+    simulated_revenue = (
+        float(baseline_revenue)
+        * demand_factor
+        * price_factor
+    )
+
+    return max(
+        simulated_revenue,
+        0.0
+    )
+
 
 def predict_revenue(
     quantity,
@@ -343,20 +457,21 @@ def predict_revenue(
     selected_date
 ):
 
-    features = create_regression_features(
+    features = create_features(
         quantity,
         price,
         selected_date
     )
 
-    prediction = revenue_model.predict(features)[0]
+    prediction = revenue_model.predict(
+        features
+    )[0]
 
-    return max(float(prediction), 0)
+    return max(
+        float(prediction),
+        0
+    )
 
-
-# =========================================================
-# DEMAND PREDICTION
-# =========================================================
 
 def predict_demand(
     quantity,
@@ -364,97 +479,101 @@ def predict_demand(
     selected_date
 ):
 
-    features = create_regression_features(
+    features = create_features(
         quantity,
         price,
         selected_date
     )
 
-    prediction = demand_model.predict(features)[0]
-
-    probability = None
-
-    if hasattr(demand_model, "predict_proba"):
-
-        probabilities = demand_model.predict_proba(features)[0]
-
-        classes = list(demand_model.classes_)
-
-        if 1 in classes:
-
-            index = classes.index(1)
-
-            probability = float(
-                probabilities[index] * 100
-            )
-
-        else:
-
-            probability = float(
-                max(probabilities) * 100
-            )
-
-    if int(prediction) == 1:
-
-        demand_status = "High Demand"
-
-    else:
-
-        demand_status = "Normal Demand"
-
-    return demand_status, probability
-
-
-# =========================================================
-# NLP PRODUCT ANALYSIS
-# =========================================================
-
-def analyze_product_text(description):
-
-    text = str(description).strip()
-
-    if not text:
-
-        return "No Product Description", 0.0
-
-    vectorized_text = tfidf.transform([text])
-
-    prediction = nlp_model.predict(
-        vectorized_text
+    prediction = demand_model.predict(
+        features
     )[0]
 
     probability = None
 
-    if hasattr(nlp_model, "predict_proba"):
+    if hasattr(
+        demand_model,
+        "predict_proba"
+    ):
 
-        probabilities = nlp_model.predict_proba(
-            vectorized_text
-        )[0]
+        probabilities = (
+            demand_model.predict_proba(
+                features
+            )[0]
+        )
 
-        classes = list(nlp_model.classes_)
+        if len(probabilities) > 1:
 
-        if 1 in classes:
-
-            index = classes.index(1)
-
-            probability = float(
-                probabilities[index] * 100
+            probability = (
+                float(probabilities[1])
+                * 100
             )
 
-    if int(prediction) == 1:
+    status = (
+        "High Demand"
+        if int(prediction) == 1
+        else "Normal Demand"
+    )
 
-        status = "Return/Cancellation Risk"
-
-    else:
-
-        status = "Normal Product Pattern"
-
-    return status, probability
+    return (
+        status,
+        probability
+    )
 
 
-# =========================================================
-# FULL ANALYSIS
-# =========================================================
+def analyze_text(
+    description
+):
+
+    if not description:
+
+        return (
+            "No Description",
+            None
+        )
+
+    try:
+
+        transformed = tfidf.transform(
+            [description]
+        )
+
+        prediction = nlp_model.predict(
+            transformed
+        )[0]
+
+        probability = None
+
+        if hasattr(
+            nlp_model,
+            "predict_proba"
+        ):
+
+            probability = (
+                float(
+                    nlp_model.predict_proba(
+                        transformed
+                    )[0][1]
+                )
+                * 100
+            )
+
+        status = str(
+            prediction
+        )
+
+        return (
+            status,
+            probability
+        )
+
+    except Exception:
+
+        return (
+            "Unable to analyse",
+            None
+        )
+
 
 def analyze_scenario(
     quantity,
@@ -469,91 +588,49 @@ def analyze_scenario(
         selected_date
     )
 
-    demand_status, demand_probability = predict_demand(
-        quantity,
-        price,
-        selected_date
+    demand_status, demand_probability = (
+        predict_demand(
+            quantity,
+            price,
+            selected_date
+        )
     )
 
-    text_status, text_probability = analyze_product_text(
-        description
+    text_status, text_probability = (
+        analyze_text(
+            description
+        )
     )
 
     return {
+
         "revenue": revenue,
+
         "demand_status": demand_status,
+
         "demand_probability": demand_probability,
+
         "text_status": text_status,
+
         "text_probability": text_probability
+
     }
 
 
-# =========================================================
-# HERO
-# =========================================================
-
-st.markdown("""
-<div style="text-align:center; padding:20px 0 10px 0;">
-
-<div style="
-display:inline-block;
-padding:7px 15px;
-border-radius:30px;
-background:rgba(90,100,220,0.12);
-border:1px solid rgba(120,130,255,0.25);
-color:#aeb8ff;
-font-size:13px;
-font-weight:600;
-">
-AI-POWERED DIGITAL TWIN
-</div>
-
-<div class="hero-title">
-FutureTwin AI
-</div>
-
-<div class="hero-subtitle" style="margin:auto;">
-Test a possible future business scenario before making the real-world decision.
-Create your digital twin, change conditions, and explore how revenue and demand
-may change.
-</div>
-
-</div>
-""", unsafe_allow_html=True)
-
-st.write("")
-
-
-# =========================================================
-# MAIN TABS
-# =========================================================
-
-tabs = st.tabs([
-    "🏠 Overview",
-    "🏢 Company Setup",
-    "🧬 Digital Twin",
-    "🔮 Future Simulator",
-    "⚠️ AI Insights",
-    "📊 Compare Futures",
-    "🕘 History"
-])
-
-
-# =========================================================
+# ============================================================
 # TAB 1 — OVERVIEW
-# =========================================================
+# ============================================================
 
 with tabs[0]:
 
     st.markdown(
-        '<div class="section-title">Your future starts with a scenario</div>',
+        '<div class="section-title">What is FutureTwin AI?</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
         '<div class="section-subtitle">'
-        'FutureTwin converts your current business conditions into '
-        'AI-based future scenario insights.'
+        'An interactive machine-learning based business simulation environment.'
         '</div>',
         unsafe_allow_html=True
     )
@@ -565,11 +642,11 @@ with tabs[0]:
         st.markdown("""
         <div class="card">
 
-        <h3>🧬 Digital Twin</h3>
+        <h3>📈 Predict</h3>
 
         <p>
-        Create a simplified digital representation of your current
-        product and business scenario.
+        Estimate future revenue using a trained
+        Random Forest regression model.
         </p>
 
         </div>
@@ -580,11 +657,11 @@ with tabs[0]:
         st.markdown("""
         <div class="card">
 
-        <h3>🔮 What-If Simulation</h3>
+        <h3>🔮 Simulate</h3>
 
         <p>
-        Change demand, price and other scenario conditions to explore
-        possible future outcomes.
+        Change demand and price assumptions
+        to explore possible future scenarios.
         </p>
 
         </div>
@@ -595,11 +672,11 @@ with tabs[0]:
         st.markdown("""
         <div class="card">
 
-        <h3>📊 AI Intelligence</h3>
+        <h3>⚖️ Compare</h3>
 
         <p>
-        Combine revenue prediction, demand classification and product
-        text analysis into one decision-support view.
+        Compare multiple possible futures
+        before making a business decision.
         </p>
 
         </div>
@@ -615,70 +692,83 @@ with tabs[0]:
     </div>
 
     <div class="prediction-text">
-    Current business data → Digital Twin → AI models →
-    What-if simulation → Future comparison → Decision insights
+
+    Historical Retail Data
+    →
+    Feature Engineering
+    →
+    Machine Learning
+    →
+    Digital Twin
+    →
+    What-if Scenario
+    →
+    Future Comparison
+
     </div>
 
     </div>
     """, unsafe_allow_html=True)
 
+    st.write("")
+
     st.info(
-        "FutureTwin provides model-based scenario insights. "
-        "It does not guarantee future outcomes."
+        "FutureTwin AI provides model-based estimates and scenario simulations. "
+        "It does not guarantee future business outcomes."
     )
 
 
-# =========================================================
+# ============================================================
 # TAB 2 — COMPANY SETUP
-# =========================================================
+# ============================================================
 
 with tabs[1]:
 
     st.markdown(
-        '<div class="section-title">Create your Digital Twin</div>',
+        '<div class="section-title">Company Setup</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
         '<div class="section-subtitle">'
-        'Enter only the information required to simulate your product scenario.'
+        'Create the business state that will be used by your Digital Twin.'
         '</div>',
         unsafe_allow_html=True
     )
-
-    company = st.text_input(
-        "Company / Project Name",
-        value=st.session_state.company
-    )
-
-    st.session_state.company = company
-
-    st.write("")
 
     c1, c2 = st.columns(2)
 
     with c1:
 
-        product_description = st.text_input(
-            "Product Description",
-            value=st.session_state.product_description,
-            placeholder="Example: wireless bluetooth headphones"
+        company_name = st.text_input(
+            "Company Name",
+            value="FutureMart"
         )
 
-        quantity = st.number_input(
-            "Expected Quantity",
-            min_value=1.0,
-            value=100.0,
-            step=1.0
+        product_name = st.text_input(
+            "Product Name",
+            value="Wireless Headphones"
+        )
+
+        product_description = st.text_area(
+            "Product Description",
+            value="Premium wireless headphones"
         )
 
     with c2:
 
+        quantity = st.number_input(
+            "Expected Quantity",
+            min_value=1,
+            value=500,
+            step=1
+        )
+
         price = st.number_input(
-            "Unit Price",
+            "Unit Price (₹)",
             min_value=0.01,
-            value=50.0,
-            step=1.0
+            value=1500.0,
+            step=50.0
         )
 
         selected_date = st.date_input(
@@ -686,80 +776,57 @@ with tabs[1]:
             value=date.today()
         )
 
-    st.session_state.product_description = product_description
-
-    st.write("")
-
-    st.markdown("""
-    <div class="card">
-
-    <h3>What FutureTwin will calculate</h3>
-
-    <p>
-    You provide four simple inputs. FutureTwin internally creates the
-    model features required by the trained machine learning models.
-    </p>
-
-    </div>
-    """, unsafe_allow_html=True)
-
     st.write("")
 
     if st.button(
-        "🧬 Create My Digital Twin",
+        "Create Digital Twin",
         use_container_width=True
     ):
 
-        if not product_description.strip():
+        result = analyze_scenario(
+            quantity,
+            price,
+            selected_date,
+            product_description
+        )
 
-            st.warning(
-                "Please enter a product description."
-            )
+        st.session_state.input_data = {
 
-        else:
+            "company": company_name,
 
-            result = analyze_scenario(
-                quantity,
-                price,
-                selected_date,
-                product_description
-            )
+            "product": product_name,
 
-            st.session_state.input_data = {
-                "product_description": product_description,
-                "quantity": quantity,
-                "price": price,
-                "date": selected_date
-            }
+            "description": product_description,
 
-            st.session_state.prediction = result
+            "quantity": quantity,
 
-            st.session_state.history.append({
-                "Scenario": "Current Business State",
-                "Revenue": round(result["revenue"], 2),
-                "Demand": result["demand_status"],
-                "Text Analysis": result["text_status"]
-            })
+            "price": price,
 
-            st.success(
-                "Digital Twin created successfully. Open the Digital Twin tab."
-            )
+            "date": selected_date
+
+        }
+
+        st.session_state.prediction = result
+
+        st.success(
+            "Digital Twin created successfully."
+        )
 
 
-# =========================================================
+# ============================================================
 # TAB 3 — DIGITAL TWIN
-# =========================================================
+# ============================================================
 
 with tabs[2]:
 
     st.markdown(
-        '<div class="section-title">Your Digital Twin</div>',
+        '<div class="section-title">Digital Twin</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
         '<div class="section-subtitle">'
-        'AI-generated representation of your current product scenario.'
+        'Current model-based representation of your business scenario.'
         '</div>',
         unsafe_allow_html=True
     )
@@ -767,33 +834,99 @@ with tabs[2]:
     if st.session_state.prediction is None:
 
         st.warning(
-            "First create your Digital Twin in Company Setup."
+            "Create your Digital Twin from Company Setup first."
         )
 
     else:
 
+        data = st.session_state.input_data
         prediction = st.session_state.prediction
 
-        input_data = st.session_state.input_data
-
-        c1, c2, c3 = st.columns(3)
+        c1, c2, c3, c4 = st.columns(4)
 
         with c1:
+
+            st.markdown("""
+            <div class="metric-card">
+            <div class="metric-label">COMPANY</div>
+            <div class="metric-value"
+            style="font-size:22px;">
+            """ + str(data["company"]) + """
+            </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with c2:
+
+            st.markdown("""
+            <div class="metric-card">
+            <div class="metric-label">PRODUCT</div>
+            <div class="metric-value"
+            style="font-size:22px;">
+            """ + str(data["product"]) + """
+            </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with c3:
 
             st.markdown(
                 f"""
                 <div class="metric-card">
 
                 <div class="metric-label">
-                PREDICTED FUTURE REVENUE
+                QUANTITY
+                </div>
+
+                <div class="metric-value">
+                {data["quantity"]:,.0f}
+                </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        with c4:
+
+            st.markdown(
+                f"""
+                <div class="metric-card">
+
+                <div class="metric-label">
+                UNIT PRICE
+                </div>
+
+                <div class="metric-value">
+                ₹{data["price"]:,.0f}
+                </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.write("")
+
+        c1, c2 = st.columns(2)
+
+        with c1:
+
+            st.markdown(
+                f"""
+                <div class="prediction-box">
+
+                <div class="prediction-title">
+                📈 Revenue Prediction
                 </div>
 
                 <div class="metric-value">
                 ₹{prediction["revenue"]:,.0f}
                 </div>
 
-                <div class="metric-label">
-                Model prediction
+                <div class="prediction-text">
+                Estimated future revenue based on the
+                trained Random Forest model.
                 </div>
 
                 </div>
@@ -803,59 +936,21 @@ with tabs[2]:
 
         with c2:
 
-            probability = prediction["demand_probability"]
-
-            demand_value = (
-                f"{probability:.1f}%"
-                if probability is not None
-                else prediction["demand_status"]
-            )
-
             st.markdown(
                 f"""
-                <div class="metric-card">
+                <div class="prediction-box">
 
-                <div class="metric-label">
-                DEMAND SIGNAL
+                <div class="prediction-title">
+                📊 Demand Signal
                 </div>
 
-                <div class="metric-value">
-                {demand_value}
-                </div>
-
-                <div class="metric-label">
+                <div class="metric-value"
+                style="font-size:28px;">
                 {prediction["demand_status"]}
                 </div>
 
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-        with c3:
-
-            text_probability = prediction["text_probability"]
-
-            text_value = (
-                f"{text_probability:.1f}%"
-                if text_probability is not None
-                else "Analyzed"
-            )
-
-            st.markdown(
-                f"""
-                <div class="metric-card">
-
-                <div class="metric-label">
-                PRODUCT TEXT SIGNAL
-                </div>
-
-                <div class="metric-value">
-                {text_value}
-                </div>
-
-                <div class="metric-label">
-                {prediction["text_status"]}
+                <div class="prediction-text">
+                Model-based demand classification.
                 </div>
 
                 </div>
@@ -863,82 +958,21 @@ with tabs[2]:
                 unsafe_allow_html=True
             )
 
-        st.write("")
 
-        st.markdown(
-            f"""
-            <div class="prediction-box">
-
-            <div class="prediction-title">
-            🔮 FutureTwin Outlook
-            </div>
-
-            <div class="prediction-text">
-
-            For <b>{input_data["product_description"]}</b>,
-            with an expected quantity of <b>{input_data["quantity"]:,.0f}</b>
-            units at <b>₹{input_data["price"]:,.2f}</b> per unit,
-            the revenue model estimates approximately
-
-            <b>₹{prediction["revenue"]:,.0f}</b>
-            in future revenue.
-
-            The demand model indicates
-            <b>{prediction["demand_status"]}</b>.
-
-            The product description analysis indicates
-            <b>{prediction["text_status"]}</b>.
-
-            </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.write("")
-
-        st.subheader("Current Digital Twin State")
-
-        twin_df = pd.DataFrame({
-            "Parameter": [
-                "Company",
-                "Product",
-                "Quantity",
-                "Unit Price",
-                "Date"
-            ],
-
-            "Value": [
-                st.session_state.company,
-                input_data["product_description"],
-                input_data["quantity"],
-                f"₹{input_data['price']:,.2f}",
-                input_data["date"]
-            ]
-        })
-
-        st.dataframe(
-            twin_df,
-            use_container_width=True,
-            hide_index=True
-        )
-
-
-# =========================================================
+# ============================================================
 # TAB 4 — FUTURE SIMULATOR
-# =========================================================
+# ============================================================
 
 with tabs[3]:
 
     st.markdown(
-        '<div class="section-title">What happens if the future changes?</div>',
+        '<div class="section-title">Future Simulator</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
         '<div class="section-subtitle">'
-        'Modify the expected demand or price and compare the simulated future.'
+        'Change business assumptions and explore a possible future.'
         '</div>',
         unsafe_allow_html=True
     )
@@ -963,50 +997,44 @@ with tabs[3]:
 
         selected_date = input_data["date"]
 
-        description = input_data["product_description"]
+        description = input_data["description"]
 
         c1, c2 = st.columns(2)
 
         with c1:
 
             demand_change = st.slider(
-                "Future Demand Change (%)",
-                -50,
-                100,
-                0,
-                5
+                "Demand Change (%)",
+                min_value=-50,
+                max_value=100,
+                value=0,
+                step=5
             )
 
         with c2:
 
             price_change = st.slider(
-                "Future Price Change (%)",
-                -30,
-                50,
-                0,
-                5
+                "Price Change (%)",
+                min_value=-30,
+                max_value=50,
+                value=0,
+                step=5
             )
 
-        future_quantity = (
-            base_quantity *
-            (1 + demand_change / 100)
-        )
-
-        future_price = (
-            base_price *
-            (1 + price_change / 100)
-        )
-
         future_quantity = max(
-            future_quantity,
+            base_quantity *
+            (1 + demand_change / 100),
             1
         )
 
         future_price = max(
-            future_price,
+            base_price *
+            (1 + price_change / 100),
             0.01
         )
 
+        # IMPORTANT:
+        # This is the trained ML baseline.
         base_result = analyze_scenario(
             base_quantity,
             base_price,
@@ -1014,15 +1042,24 @@ with tabs[3]:
             description
         )
 
-        future_result = analyze_scenario(
-            future_quantity,
-            future_price,
-            selected_date,
-            description
+        # Keep the demand classifier working.
+        future_demand_status, future_demand_probability = (
+            predict_demand(
+                future_quantity,
+                future_price,
+                selected_date
+            )
+        )
+
+        # Working scenario logic:
+        future_revenue = scenario_adjusted_revenue(
+            base_result["revenue"],
+            demand_change,
+            price_change
         )
 
         revenue_change = (
-            future_result["revenue"] -
+            future_revenue -
             base_result["revenue"]
         )
 
@@ -1044,7 +1081,7 @@ with tabs[3]:
                 <div class="metric-card">
 
                 <div class="metric-label">
-                CURRENT REVENUE
+                CURRENT / BASELINE
                 </div>
 
                 <div class="metric-value">
@@ -1052,7 +1089,7 @@ with tabs[3]:
                 </div>
 
                 <div class="metric-label">
-                Current scenario
+                Trained ML estimate
                 </div>
 
                 </div>
@@ -1071,11 +1108,11 @@ with tabs[3]:
                 </div>
 
                 <div class="metric-value">
-                ₹{future_result["revenue"]:,.0f}
+                ₹{future_revenue:,.0f}
                 </div>
 
                 <div class="metric-label">
-                Future scenario
+                Scenario-adjusted estimate
                 </div>
 
                 </div>
@@ -1104,26 +1141,133 @@ with tabs[3]:
         else:
 
             st.info(
-                "The simulated revenue remains approximately unchanged."
+                "No revenue change because the scenario "
+                "assumptions are unchanged."
             )
 
         st.write("")
 
-        comparison_df = pd.DataFrame({
+        # ----------------------------------------------------
+        # COLOURED CURRENT VS FUTURE GRAPH
+        # ----------------------------------------------------
+
+        chart_display = pd.DataFrame({
+
             "State": [
-                "Current",
-                "Future"
+                "Current / Baseline",
+                "Simulated Future"
             ],
 
             "Revenue": [
                 base_result["revenue"],
-                future_result["revenue"]
+                future_revenue
             ]
+
         })
 
-        st.bar_chart(
-            comparison_df.set_index("State")
+        sim_chart = alt.Chart(
+            chart_display
+        ).mark_bar(
+            cornerRadiusTopLeft=8,
+            cornerRadiusTopRight=8
+        ).encode(
+
+            x=alt.X(
+                "State:N",
+                title=None,
+                sort=[
+                    "Current / Baseline",
+                    "Simulated Future"
+                ]
+            ),
+
+            y=alt.Y(
+                "Revenue:Q",
+                title="Revenue (₹)"
+            ),
+
+            color=alt.Color(
+                "State:N",
+
+                scale=alt.Scale(
+
+                    domain=[
+                        "Current / Baseline",
+                        "Simulated Future"
+                    ],
+
+                    range=[
+                        "#8B5CF6",
+                        "#22C7C3"
+                    ]
+
+                ),
+
+                legend=None
+            ),
+
+            tooltip=[
+
+                alt.Tooltip(
+                    "State:N",
+                    title="Scenario"
+                ),
+
+                alt.Tooltip(
+                    "Revenue:Q",
+                    title="Revenue",
+                    format=",.0f"
+                )
+
+            ]
+
+        ).properties(
+            height=380
         )
+
+        st.altair_chart(
+            sim_chart,
+            use_container_width=True
+        )
+
+        st.caption(
+            "Baseline = trained ML revenue estimate • "
+            "Future = scenario-adjusted estimate"
+        )
+
+        st.write("")
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        with c1:
+
+            st.metric(
+                "Demand Change",
+                f"{demand_change:+d}%"
+            )
+
+        with c2:
+
+            st.metric(
+                "Price Change",
+                f"{price_change:+d}%"
+            )
+
+        with c3:
+
+            st.metric(
+                "Future Quantity",
+                f"{future_quantity:,.0f}"
+            )
+
+        with c4:
+
+            st.metric(
+                "Future Price",
+                f"₹{future_price:,.2f}"
+            )
+
+        st.write("")
 
         st.markdown(
             f"""
@@ -1156,7 +1300,7 @@ with tabs[3]:
             <br><br>
 
             Future demand signal:
-            <b>{future_result["demand_status"]}</b>
+            <b>{future_demand_status}</b>
 
             </div>
 
@@ -1173,13 +1317,32 @@ with tabs[3]:
         ):
 
             st.session_state.history.append({
-                "Scenario": f"Demand {demand_change:+d}% / Price {price_change:+d}%",
-                "Revenue": round(
-                    future_result["revenue"],
-                    2
-                ),
-                "Demand": future_result["demand_status"],
-                "Text Analysis": future_result["text_status"]
+
+                "Scenario":
+                    f"Demand {demand_change:+d}% / "
+                    f"Price {price_change:+d}%",
+
+                "Baseline Revenue":
+                    round(
+                        base_result["revenue"],
+                        2
+                    ),
+
+                "Simulated Revenue":
+                    round(
+                        future_revenue,
+                        2
+                    ),
+
+                "Revenue Change":
+                    round(
+                        revenue_change,
+                        2
+                    ),
+
+                "Demand":
+                    future_demand_status
+
             })
 
             st.success(
@@ -1187,9 +1350,9 @@ with tabs[3]:
             )
 
 
-# =========================================================
+# ============================================================
 # TAB 5 — AI INSIGHTS
-# =========================================================
+# ============================================================
 
 with tabs[4]:
 
@@ -1225,8 +1388,9 @@ with tabs[4]:
             <h3>📈 Revenue Prediction</h3>
 
             <p>
-            The Random Forest Regressor uses nine engineered daily-level
-            features to estimate future revenue.
+            The Random Forest Regressor estimates
+            future revenue using engineered
+            business features.
             </p>
 
             </div>
@@ -1247,8 +1411,9 @@ with tabs[4]:
             <h3>📊 Future Demand</h3>
 
             <p>
-            The Random Forest Classifier estimates whether the scenario
-            corresponds to a high-demand or normal-demand condition.
+            The Random Forest Classifier estimates
+            whether the scenario corresponds to
+            a high-demand or normal-demand condition.
             </p>
 
             </div>
@@ -1278,10 +1443,9 @@ with tabs[4]:
         <h3>📝 Product Text Analysis</h3>
 
         <p>
-        The product description is converted into TF-IDF features and
-        analyzed using Logistic Regression. The model identifies whether
-        the product text resembles patterns associated with returns or
-        cancellations in the training data.
+        Product descriptions are transformed into
+        TF-IDF features and analysed using the
+        trained Logistic Regression model.
         </p>
 
         </div>
@@ -1302,14 +1466,15 @@ with tabs[4]:
             )
 
         st.info(
-            "These model outputs are learned from historical Online Retail II data "
-            "and should be interpreted as predictive signals, not guaranteed outcomes."
+            "Model outputs are learned from historical "
+            "Online Retail II data and should be interpreted "
+            "as predictive signals, not guaranteed outcomes."
         )
 
 
-# =========================================================
+# ============================================================
 # TAB 6 — COMPARE FUTURES
-# =========================================================
+# ============================================================
 
 with tabs[5]:
 
@@ -1320,7 +1485,7 @@ with tabs[5]:
 
     st.markdown(
         '<div class="section-subtitle">'
-        'Explore several predefined what-if scenarios using the trained models.'
+        'Explore multiple what-if scenarios side by side.'
         '</div>',
         unsafe_allow_html=True
     )
@@ -1345,21 +1510,35 @@ with tabs[5]:
 
         selected_date = input_data["date"]
 
-        description = input_data["product_description"]
+        description = input_data["description"]
 
         scenarios = {
+
             "Current": (0, 0),
+
             "Demand +10%": (10, 0),
+
             "Demand +20%": (20, 0),
+
             "Price +10%": (0, 10),
+
             "Demand +20% + Price +10%": (20, 10)
+
         }
+
+        # Get one trained ML baseline.
+        baseline = predict_revenue(
+            base_quantity,
+            base_price,
+            selected_date
+        )
 
         rows = []
 
         for name, changes in scenarios.items():
 
             demand_change = changes[0]
+
             price_change = changes[1]
 
             scenario_quantity = (
@@ -1372,49 +1551,147 @@ with tabs[5]:
                 (1 + price_change / 100)
             )
 
-            result = analyze_scenario(
-                scenario_quantity,
-                scenario_price,
-                selected_date,
-                description
+            # Keep the trained demand classifier.
+            demand_status, probability = (
+                predict_demand(
+                    scenario_quantity,
+                    scenario_price,
+                    selected_date
+                )
+            )
+
+            # IMPORTANT:
+            # Use the working scenario adjustment
+            # instead of asking the Random Forest to
+            # produce identical tree-leaf predictions.
+            simulated_revenue = (
+                scenario_adjusted_revenue(
+                    baseline,
+                    demand_change,
+                    price_change
+                )
             )
 
             rows.append({
+
                 "Future Scenario": name,
-                "Predicted Revenue": round(
-                    result["revenue"],
+
+                "Revenue": round(
+                    simulated_revenue,
                     2
                 ),
-                "Demand Status": result["demand_status"]
+
+                "Demand Status":
+                    demand_status
+
             })
 
-        comparison = pd.DataFrame(rows)
+        comparison = pd.DataFrame(
+            rows
+        )
 
         st.dataframe(
-            comparison,
+            comparison.rename(
+                columns={
+                    "Revenue":
+                    "Simulated Revenue"
+                }
+            ),
             use_container_width=True,
             hide_index=True
         )
 
         st.write("")
 
-        chart_df = comparison[
-            [
-                "Future Scenario",
-                "Predicted Revenue"
+        # ----------------------------------------------------
+        # COLOURED COMPARE FUTURES GRAPH
+        # ----------------------------------------------------
+
+        colour_domain = [
+            "Current",
+            "Demand +10%",
+            "Demand +20%",
+            "Price +10%",
+            "Demand +20% + Price +10%"
+        ]
+
+        colour_range = [
+            "#8B5CF6",
+            "#38BDF8",
+            "#22C7C3",
+            "#F59E0B",
+            "#EC6AAE"
+        ]
+
+        compare_chart = alt.Chart(
+            comparison
+        ).mark_bar(
+            cornerRadiusTopLeft=8,
+            cornerRadiusTopRight=8
+        ).encode(
+
+            x=alt.X(
+                "Future Scenario:N",
+                title=None,
+                sort=colour_domain
+            ),
+
+            y=alt.Y(
+                "Revenue:Q",
+                title="Simulated Revenue (₹)"
+            ),
+
+            color=alt.Color(
+
+                "Future Scenario:N",
+
+                scale=alt.Scale(
+                    domain=colour_domain,
+                    range=colour_range
+                ),
+
+                legend=None
+            ),
+
+            tooltip=[
+
+                alt.Tooltip(
+                    "Future Scenario:N",
+                    title="Scenario"
+                ),
+
+                alt.Tooltip(
+                    "Revenue:Q",
+                    title="Revenue",
+                    format=",.0f"
+                ),
+
+                alt.Tooltip(
+                    "Demand Status:N",
+                    title="Demand"
+                )
+
             ]
-        ].set_index(
-            "Future Scenario"
+
+        ).properties(
+            height=400
         )
 
-        st.bar_chart(
-            chart_df
+        st.altair_chart(
+            compare_chart,
+            use_container_width=True
+        )
+
+        st.caption(
+            "Each bar represents a different scenario assumption. "
+            "Revenue is calculated from the trained ML baseline "
+            "and the transparent scenario-adjustment layer."
         )
 
 
-# =========================================================
+# ============================================================
 # TAB 7 — HISTORY
-# =========================================================
+# ============================================================
 
 with tabs[6]:
 
@@ -1430,10 +1707,13 @@ with tabs[6]:
         unsafe_allow_html=True
     )
 
-    if len(st.session_state.history) == 0:
+    if len(
+        st.session_state.history
+    ) == 0:
 
         st.info(
-            "No scenarios saved yet. Create your Digital Twin and run a simulation."
+            "No scenarios saved yet. "
+            "Create your Digital Twin and run a simulation."
         )
 
     else:
@@ -1449,30 +1729,34 @@ with tabs[6]:
         )
 
 
-# =========================================================
+# ============================================================
 # FOOTER
-# =========================================================
+# ============================================================
 
 st.write("")
 
 st.markdown("""
-<hr style="
-border:0;
-border-top:1px solid rgba(255,255,255,0.08);
-">
+<div class="soft-divider"></div>
 
 <div style="
 text-align:center;
-color:#69738a;
+color:#78839f;
 font-size:13px;
 padding:15px;
 ">
 
-FutureTwin AI • AI-powered future scenario simulation
+<b style="color:#aeb8d2;">
+FutureTwin AI
+</b>
 
 <br><br>
 
-Model-based simulation only. Results are not guaranteed future outcomes
+AI-powered future scenario simulation
+
+<br><br>
+
+Model-based simulation only.
+Results are not guaranteed future outcomes
 and should be validated before real-world implementation.
 
 </div>
