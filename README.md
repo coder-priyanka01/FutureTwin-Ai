@@ -1,6 +1,6 @@
 # 🔮 FutureTwin AI — Business Future Simulation Platform
 
-🚀 **Live Demo:** [Try FutureTwin AI](https://future-twin-ai.streamlit.app/)
+🚀 **Live Demo:** [Try FutureTwin AI](https://futuretwin-ai.streamlit.app//)
 
 💻 **GitHub Repository:** [View Source Code](https://github.com/coder-priyanka01/FutureTwin-Ai)
 
