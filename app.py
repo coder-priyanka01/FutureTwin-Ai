@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+import json
+import os
 import altair as alt
 from datetime import date
 
@@ -341,8 +343,43 @@ if "prediction" not in st.session_state:
 if "input_data" not in st.session_state:
     st.session_state.input_data = None
 
+# History is kept in session state and mirrored to a local JSON file.
+# This preserves records across ordinary Streamlit reruns on the same filesystem.
+HISTORY_FILE = "futuretwin_history.json"
+
+
+def load_saved_history():
+    try:
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, "r", encoding="utf-8") as history_file:
+                saved_data = json.load(history_file)
+                if isinstance(saved_data, list):
+                    return saved_data
+    except (OSError, json.JSONDecodeError):
+        pass
+    return []
+
+
+def persist_saved_history():
+    try:
+        temporary_file = HISTORY_FILE + ".tmp"
+        with open(temporary_file, "w", encoding="utf-8") as history_file:
+            json.dump(
+                st.session_state.history,
+                history_file,
+                ensure_ascii=False,
+                indent=2
+            )
+        os.replace(temporary_file, HISTORY_FILE)
+    except OSError as error:
+        st.warning(f"Could not persist scenario history: {error}")
+
+
 if "history" not in st.session_state:
-    st.session_state.history = []
+    st.session_state.history = load_saved_history()
+
+if "auto_saved_scenarios" not in st.session_state:
+    st.session_state.auto_saved_scenarios = set()
 
 
 # ============================================================
@@ -1058,6 +1095,29 @@ with tabs[3]:
             price_change
         )
 
+        # Save each distinct simulated combination once, without changing the UI.
+        scenario_signature = (
+            str(description),
+            str(selected_date),
+            round(float(base_quantity), 4),
+            round(float(base_price), 4),
+            int(demand_change),
+            int(price_change)
+        )
+        if scenario_signature not in st.session_state.auto_saved_scenarios:
+            st.session_state.history.append({
+                "Scenario": (
+                    f"Demand {demand_change:+d}% / "
+                    f"Price {price_change:+d}%"
+                ),
+                "Baseline Revenue": round(float(base_result["revenue"]), 2),
+                "Simulated Revenue": round(float(future_revenue), 2),
+                "Revenue Change": round(float(future_revenue - base_result["revenue"]), 2),
+                "Demand": future_demand_status
+            })
+            st.session_state.auto_saved_scenarios.add(scenario_signature)
+            persist_saved_history()
+
         revenue_change = (
             future_revenue -
             base_result["revenue"]
@@ -1344,6 +1404,7 @@ with tabs[3]:
                     future_demand_status
 
             })
+            persist_saved_history()
 
             st.success(
                 "Future scenario saved."
