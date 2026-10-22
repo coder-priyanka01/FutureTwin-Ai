@@ -1,6 +1,11 @@
 # 🔮 FutureTwin AI — Business Future Simulation Platform
 
-**Simulate Possible Business Futures Using Machine Learning**
+🚀 **Live Demo:** [Try FutureTwin AI](https://future-twin-ai.streamlit.app/)
+
+💻 **GitHub Repository:** [View Source Code](https://github.com/coder-priyanka01/FutureTwin-Ai)
+
+**Simulate possible business futures using machine learning, scenario modelling, and interactive decision support.**
+
 
 FutureTwin AI is a machine-learning-based business simulation platform designed to help users explore possible business outcomes through revenue prediction, demand analysis, customer segmentation, product text analysis, and what-if scenario simulation.
 
